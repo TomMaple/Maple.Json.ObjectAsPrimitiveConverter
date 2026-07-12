@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Maple.Json.ObjectAsPrimitiveConverter/Maple.Json.ObjectAsPrimitiveConverter.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Maple.Json.ObjectAsPrimitiveConverter.Tests.Unit/Maple.Json.ObjectAsPrimitiveConverter.Tests.Unit.csproj" Id="ef532974-c954-4165-94ff-2e31d54e693c" />
+  </Folder>
+</Solution>
