@@ -4,21 +4,21 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
 
-    <PackageId>Maple.Result</PackageId>
-    <Title>An abstraction which contains the value or the error of the operation. It can be mapped to the HTTP reponse if needed.</Title>
-    <Description>An abstraction which contains the value or the error of the operation. It can be mapped to the HTTP reponse if needed.</Description>
+    <PackageId>Maple.Json.ObjectAsPrimitiveConverter</PackageId>
+    <Title>A System.Text.Json converter that allows to serialize and deserialize objects properties using primitive types.</Title>
+    <Description>A converter for System.Text Json that allows to serialize and deserialize objects properties using primitive types.</Description>
     <Authors>Tom Maple</Authors>
     <PublisherName>Tom Maple</PublisherName>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageTags>Result;Error;RFC-9457;RFC-7807</PackageTags>
+    <PackageTags>JSON;JSON converter;converter;primitive types;System.Text.Json</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-    <PackageProjectUrl>https://github.com/TomMaple/Result</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/TomMaple/Result</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
