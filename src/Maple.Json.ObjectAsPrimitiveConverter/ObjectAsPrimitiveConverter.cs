@@ -40,7 +40,8 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     #region constructors
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ObjectAsPrimitiveConverter"/> class with the specified configuration options.
+    ///     Initializes a new instance of the <see cref="ObjectAsPrimitiveConverter" /> class with the specified configuration
+    ///     options.
     /// </summary>
     /// <param name="floatFormat">Specifies the default type for floating-point numbers.</param>
     /// <param name="unknownNumberFormat">Specifies the behavior when encountering a number format that is not recognized.</param>
@@ -61,22 +62,23 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     #endregion
 
     /// <summary>
-    /// The type for floating-point numbers.
+    ///     The type for floating-point numbers.
     /// </summary>
     public FloatFormat FloatFormat { get; init; }
 
     /// <summary>
-    /// The behavior when encountering a number format that is not recognized.
+    ///     The behavior when encountering a number format that is not recognized.
     /// </summary>
     public UnknownNumberFormat UnknownNumberFormat { get; init; }
 
     /// <summary>
-    ///  A bitwise combination of the enumeration values that specifies which date and time representations to detect when converting text properties to primitive types.
+    ///     A bitwise combination of the enumeration values that specifies which date and time representations
+    ///     to detect when converting text properties to primitive types.
     /// </summary>
     public DetectDateTime DetectDateTime { get; init; }
 
     /// <summary>
-    /// The type to use when converting objects to primitive types.
+    ///     The type to use when converting objects to primitive types.
     /// </summary>
     public ObjectFormat ObjectFormat { get; init; }
 
@@ -103,68 +105,68 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 return reader.GetString();
 
             case JsonTokenType.Number:
+            {
+                var textValue = reader.HasValueSequence
+                    ? reader.ValueSequence.ToString()
+                    : Encoding.UTF8.GetString(reader.ValueSpan);
+
+                if (textValue.Contains("."))
                 {
-                    var textValue = reader.HasValueSequence
-                        ? reader.ValueSequence.ToString()
-                        : Encoding.UTF8.GetString(reader.ValueSpan);
-
-                    if (textValue.Contains("."))
-                    {
-                        if (TryGetFloat(reader, out var floatValue))
-                            return floatValue;
-                    }
-                    else
-                    {
-                        if (TryGetInteger(reader, textValue, out var result))
-                            return result;
-                    }
-
-                    using var doc = JsonDocument.ParseValue(ref reader);
-
-                    if (UnknownNumberFormat is UnknownNumberFormat.JsonElement)
-                        return doc.RootElement.Clone();
-
-                    throw new JsonException($"Cannot parse number: ‘{doc.RootElement.ToString()}’");
+                    if (TryGetFloat(reader, out var floatValue))
+                        return floatValue;
                 }
+                else
+                {
+                    if (TryGetInteger(reader, textValue, out var result))
+                        return result;
+                }
+
+                using var doc = JsonDocument.ParseValue(ref reader);
+
+                if (UnknownNumberFormat is UnknownNumberFormat.JsonElement)
+                    return doc.RootElement.Clone();
+
+                throw new JsonException($"Cannot parse number: ‘{doc.RootElement.ToString()}’");
+            }
 
             case JsonTokenType.StartArray:
+            {
+                var list = new List<object?>();
+                while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
                 {
-                    var list = new List<object?>();
-                    while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
-                    {
-                        var item = Read(ref reader, typeof(object), options);
-                        list.Add(item);
-                    }
-
-                    return list.ToArray();
+                    var item = Read(ref reader, typeof(object), options);
+                    list.Add(item);
                 }
+
+                return list.ToArray();
+            }
 
             case JsonTokenType.StartObject:
             {
                 var dict = CreateDictionary();
-                    while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
-                    {
-                        while (reader.TokenType == JsonTokenType.Comment)
-                            reader.Read();
-
-                        if (reader.TokenType == JsonTokenType.Null)
-                            continue;
-
-                        if (reader.TokenType != JsonTokenType.PropertyName)
-                        {
-                            using var doc = JsonDocument.ParseValue(ref reader);
-
-                            throw new JsonException($"Cannot parse object “{doc.RootElement.ToString()}”!");
-                        }
-
-                        var key = reader.GetString() ?? string.Empty;
+                while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+                {
+                    while (reader.TokenType == JsonTokenType.Comment)
                         reader.Read();
-                        var value = Read(ref reader, typeof(object), options);
-                        dict[key] = value;
+
+                    if (reader.TokenType == JsonTokenType.Null)
+                        continue;
+
+                    if (reader.TokenType != JsonTokenType.PropertyName)
+                    {
+                        using var doc = JsonDocument.ParseValue(ref reader);
+
+                        throw new JsonException($"Cannot parse object “{doc.RootElement.ToString()}”!");
                     }
 
-                    return dict;
+                    var key = reader.GetString() ?? string.Empty;
+                    reader.Read();
+                    var value = Read(ref reader, typeof(object), options);
+                    dict[key] = value;
                 }
+
+                return dict;
+            }
 
             default:
                 throw new JsonException($"Unknown token: {reader.TokenType}");
@@ -191,24 +193,38 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 
     #region helper methods
 
-    private IDictionary<string, object?> CreateDictionary() =>
-        ObjectFormat == ObjectFormat.Expando 
-            ? new ExpandoObject() 
+    private IDictionary<string, object?> CreateDictionary()
+    {
+        return ObjectFormat == ObjectFormat.Expando
+            ? new ExpandoObject()
             : new Dictionary<string, object?>();
+    }
 
-    private static bool IsDateOnly(string value) => DateOnlyRegex().IsMatch(value);
+    private static bool IsDateOnly(string value)
+    {
+        return DateOnlyRegex().IsMatch(value);
+    }
 
-    private static bool IsDateTime(string value) => DateTimeRegex().IsMatch(value);
+    private static bool IsDateTime(string value)
+    {
+        return DateTimeRegex().IsMatch(value);
+    }
 
-    private static bool IsDateTimeOffset(string value) => DateTimeOffsetRegex().IsMatch(value);
+    private static bool IsDateTimeOffset(string value)
+    {
+        return DateTimeOffsetRegex().IsMatch(value);
+    }
 
-    private static bool IsTimeOnly(string value) => TimeOnlyRegex().IsMatch(value);
+    private static bool IsTimeOnly(string value)
+    {
+        return TimeOnlyRegex().IsMatch(value);
+    }
 
     private bool TryGetDateTime(ref Utf8JsonReader reader, [NotNullWhen(true)] out object? value)
     {
         value = null;
 
-        if (reader.TokenType != JsonTokenType.String || DetectDateTimeOffset == DetectDateTime.None)
+        if (reader.TokenType != JsonTokenType.String || DetectDateTime == DetectDateTime.None)
             return false;
 
         var stringValue = reader.GetString();
@@ -219,26 +235,34 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         if (!stringValue.AsSpan().ContainsAny("0123456789"))
             return false;
 
-        // Try to parse the string as a DateTimeOffset, DateTime, DateOnly, or TimeOnly based on the DetectDateTimeOffset flags
-        if (DetectDateTimeOffset.HasFlag(DetectDateTime.DateTimeOffset) && IsDateTimeOffset(stringValue) && DateTimeOffset.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dto))
+        // Try to parse the string as a DateTimeOffset, DateTime, DateOnly, or TimeOnly based on the DetectDateTime flags
+        if (DetectDateTime.HasFlag(DetectDateTime.DateTimeOffset)
+            && IsDateTimeOffset(stringValue)
+            && DateTimeOffset.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dto))
         {
             value = dto;
             return true;
         }
 
-        if (DetectDateTimeOffset.HasFlag(DetectDateTime.DateTime) && IsDateTime(stringValue) && DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+        if (DetectDateTime.HasFlag(DetectDateTime.DateTime)
+            && IsDateTime(stringValue)
+            && DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
         {
             value = dt;
             return true;
         }
 
-        if (DetectDateTimeOffset.HasFlag(DetectDateTime.DateOnly) && IsDateOnly(stringValue) && DateOnly.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+        if (DetectDateTime.HasFlag(DetectDateTime.DateOnly)
+            && IsDateOnly(stringValue)
+            && DateOnly.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
         {
             value = date;
             return true;
         }
 
-        if (DetectDateTimeOffset.HasFlag(DetectDateTime.TimeOnly) && IsTimeOnly(stringValue) && TimeOnly.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var time))
+        if (DetectDateTime.HasFlag(DetectDateTime.TimeOnly)
+            && IsTimeOnly(stringValue)
+            && TimeOnly.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var time))
         {
             value = time;
             return true;
@@ -250,21 +274,24 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 
     private bool TryGetFloat(Utf8JsonReader reader, [NotNullWhen(true)] out object? floatValue)
     {
-        if (FloatFormat is FloatFormat.Decimal && reader.TryGetDecimal(out var dec))
+        if (FloatFormat is FloatFormat.Decimal
+            && reader.TryGetDecimal(out var dec))
         {
             floatValue = dec;
             return true;
         }
 
-        if (FloatFormat is FloatFormat.Double && reader.TryGetDouble(out var dbl) &&
-            !double.IsInfinity(dbl) && !double.IsNaN(dbl))
+        if (FloatFormat is FloatFormat.Double
+            && reader.TryGetDouble(out var dbl)
+            && !double.IsInfinity(dbl) && !double.IsNaN(dbl))
         {
             floatValue = dbl;
             return true;
         }
 
-        if (FloatFormat is FloatFormat.Float && reader.TryGetSingle(out var flt) &&
-            !float.IsInfinity(flt) && !float.IsNaN(flt))
+        if (FloatFormat is FloatFormat.Single
+            && reader.TryGetSingle(out var flt)
+            && !float.IsInfinity(flt) && !float.IsNaN(flt))
         {
             floatValue = flt;
             return true;
@@ -274,7 +301,8 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         return false;
     }
 
-    private static bool TryGetInteger(Utf8JsonReader reader, string? textValue, [NotNullWhen(true)] out object? integerValue)
+    private static bool TryGetInteger(Utf8JsonReader reader, string? textValue,
+        [NotNullWhen(true)] out object? integerValue)
     {
         if (reader.TryGetInt32(out var int32))
         {
@@ -319,21 +347,26 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     ///     (numeric, e.g. "03", or a word, e.g. "Jun") and a day (1-2 digits) — e.g. "2026-03-21", "2026/3/21",
     ///     "Sat Jun 01 2024".
     /// </summary>
-    [GeneratedRegex(@"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})\s*$", RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+    [GeneratedRegex(
+        @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})\s*$",
+        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
     private static partial Regex DateOnlyRegex();
 
     /// <summary>
     ///     Matches a text that is only a clock time: hour:minute, with optional seconds, fractional seconds,
     ///     and AM/PM designator — e.g. "13:01:06", "13:01:06.0000000", "1:01 PM".
     /// </summary>
-    [GeneratedRegex(@"^\s*\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*$", RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+    [GeneratedRegex(@"^\s*\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*$",
+        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
     private static partial Regex TimeOnlyRegex();
 
     /// <summary>
-    ///     Matches a text that is a calendar date (see <see cref="DateOnlyRegex"/>) followed by a clock time
-    ///     (see <see cref="TimeOnlyRegex"/>), with no timezone/offset part — e.g. "2026-03-21T13:01:06".
+    ///     Matches a text that is a calendar date (see <see cref="DateOnlyRegex" />) followed by a clock time
+    ///     (see <see cref="TimeOnlyRegex" />), with no timezone/offset part — e.g. "2026-03-21T13:01:06".
     /// </summary>
-    [GeneratedRegex(@"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*$", RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+    [GeneratedRegex(
+        @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*$",
+        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
     private static partial Regex DateTimeRegex();
 
     /// <summary>
@@ -341,7 +374,9 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     ///     "Z", or a sign and a 1-2 digit hour with an optional ":00"/":30" minute part — e.g.
     ///     "2024-06-01T12:34:56+04:00", "2024-06-01T12:34:56Z", "Sat Jun 01 2024 12:34:56 +04:00".
     /// </summary>
-    [GeneratedRegex(@"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*(?:Z|[+-][01]?\d(?::?[03]0)?)\s*$", RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+    [GeneratedRegex(
+        @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*(?:Z|[+-][01]?\d(?::?[03]0)?)\s*$",
+        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
     private static partial Regex DateTimeOffsetRegex();
 
     #endregion
