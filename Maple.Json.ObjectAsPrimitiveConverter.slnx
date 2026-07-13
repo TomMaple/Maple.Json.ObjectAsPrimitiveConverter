@@ -3,6 +3,24 @@
     <File Path="LICENSE" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/docs/Reference/">
+    <File Path="docs/Reference/namespace.md" />
+  </Folder>
+  <Folder Name="/docs/Reference/Configuration/">
+    <File Path="docs/Reference/Configuration/DetectDateTime.md" />
+    <File Path="docs/Reference/Configuration/FloatFormat.md" />
+    <File Path="docs/Reference/Configuration/namespace.md" />
+    <File Path="docs/Reference/Configuration/ObjectFormat.md" />
+    <File Path="docs/Reference/Configuration/UnknownNumberFormat.md" />
+  </Folder>
+  <Folder Name="/docs/Reference/ObjectAsPrimitiveConverter/">
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_constructor.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_DetectDateTime.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_FloatFormat.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_ObjectFormat.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_UnknownNumberFormat.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Maple.Json.ObjectAsPrimitiveConverter/Maple.Json.ObjectAsPrimitiveConverter.csproj" />
   </Folder>
