@@ -116,3 +116,13 @@ new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeO
 | ---- | ----- | ----------- |
 | Error | 0 | Throw an exception when an unknown number format is detected. |
 | JsonElement | 1 | Serialize an unknown number format as a [System.Text.Json.JsonElement](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonelement) (`JsonElement`) value. |
+
+# Learn More
+## Documentation
+* [Maple.Json.ObjectAsPrimitiveConverter](docs/Reference/namespace.md)
+* [Maple.Json.ObjectAsPrimitiveConverter.Configuration](docs/Reference/Configuration/namespace.md)
+
+## See also
+* [JSON serialization and deserialization in .NET - overview](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/overview)
+* [System.Text.Json](https://learn.microsoft.com/en-us/dotnet/api/system.text.json)
+* [System.Text.Json NuGet package](https://www.nuget.org/packages/System.Text.Json)
