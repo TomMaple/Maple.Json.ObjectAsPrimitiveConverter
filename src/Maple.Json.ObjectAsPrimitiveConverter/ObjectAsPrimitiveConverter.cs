@@ -33,17 +33,19 @@ namespace Maple.Json.ObjectAsPrimitiveConverter;
 /// <summary>
 ///     A JSON converter that can serialize and deserialize objects as their primitive types.
 /// </summary>
-/// <exception cref="JsonException">Unknown <see cref="JsonTokenType"/> is encountered.</exception>
+/// <exception cref="JsonException">Unknown <see cref="JsonTokenType" /> is encountered.</exception>
 /// <remarks>Based on the implementation from: https://stackoverflow.com/a/65974452</remarks>
 public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 {
-    public FloatFormat FloatFormat { get; init; }
-    public UnknownNumberFormat UnknownNumberFormat { get; init; }
-    public DetectDateTime DetectDateTimeOffset { get; init; }
-    public ObjectFormat ObjectFormat { get; init; }
-
     #region constructors
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ObjectAsPrimitiveConverter"/> class with the specified configuration options.
+    /// </summary>
+    /// <param name="floatFormat">Specifies the default type for floating-point numbers.</param>
+    /// <param name="unknownNumberFormat">Specifies the behavior when encountering a number format that is not recognized.</param>
+    /// <param name="detectDateTime">Specifies whether to detect date-time values.</param>
+    /// <param name="objectFormat">Specifies the format to use when converting objects to primitive types.</param>
     public ObjectAsPrimitiveConverter(
         FloatFormat floatFormat = FloatFormat.Decimal,
         UnknownNumberFormat unknownNumberFormat = UnknownNumberFormat.Error,
@@ -58,7 +60,27 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 
     #endregion
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// The type for floating-point numbers.
+    /// </summary>
+    public FloatFormat FloatFormat { get; init; }
+
+    /// <summary>
+    /// The behavior when encountering a number format that is not recognized.
+    /// </summary>
+    public UnknownNumberFormat UnknownNumberFormat { get; init; }
+
+    /// <summary>
+    ///  A bitwise combination of the enumeration values that specifies which date and time representations to detect when converting text properties to primitive types.
+    /// </summary>
+    public DetectDateTime DetectDateTime { get; init; }
+
+    /// <summary>
+    /// The type to use when converting objects to primitive types.
+    /// </summary>
+    public ObjectFormat ObjectFormat { get; init; }
+
+    /// <inheritdoc />
     public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         switch (reader.TokenType)
@@ -149,12 +171,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         }
     }
 
-    /// <summary>
-    ///     Writes the JSON representation of the specified value.
-    /// </summary>
-    /// <param name="writer">A <see cref="Utf8JsonWriter" /> to write the JSON value to.</param>
-    /// <param name="value">The value to write.</param>
-    /// <param name="options">A <see cref="JsonSerializerOptions" /> to use for serialization.</param>
+    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, object? value, JsonSerializerOptions options)
     {
         if (value is null)
