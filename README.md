@@ -25,14 +25,14 @@ Consider the following JSON as an example:
 ```
 
 When using *System.Text.Json* to deserialize this JSON to an `object`, the result value will look like this:
-![Serialization to object result](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/.resources/standard_object.png)
+![Serialization to object result](https://raw.githubusercontent.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/main/.resources/standard_object.png)
 
 
 When using *System.Text.Json* to deserialize this JSON to an `IDictionary<string, object>`, the result value will look like this:
-![Serialization to dictionary result](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/.resources/standard_dictionary.png)
+![Serialization to dictionary result](https://raw.githubusercontent.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/main/.resources/standard_dictionary.png)
 
 When using *System.Text.Json* to deserialize this JSON to an `object` with the `ObjectAsPrimitiveConverter`, the result value will look like this:
-![Serialization to object with converter result](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/.resources/converter.png)
+![Serialization to object with converter result](https://raw.githubusercontent.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/main/.resources/converter.png)
 
 # Quick Start
 ## Adding the *NuGet* package
