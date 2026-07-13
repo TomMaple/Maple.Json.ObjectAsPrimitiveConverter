@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Maple.Json.ObjectAsPrimitiveConverter.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Numerics;
@@ -336,7 +337,7 @@ public class ObjectAsPrimitiveConverterUnitTests
                             """;
 
         // Act
-        var result = JsonSerializer.Deserialize<object>(json, GetOptions(floatFormat: FloatFormat.Float));
+        var result = JsonSerializer.Deserialize<object>(json, GetOptions(floatFormat: FloatFormat.Single));
 
         // Assert
         result.ShouldNotBeNull();

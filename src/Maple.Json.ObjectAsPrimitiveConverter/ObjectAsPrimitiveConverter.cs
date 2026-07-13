@@ -26,6 +26,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Maple.Json.ObjectAsPrimitiveConverter.Configuration;
 
 namespace Maple.Json.ObjectAsPrimitiveConverter;
 
@@ -43,11 +44,15 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 
     #region constructors
 
-    public ObjectAsPrimitiveConverter(FloatFormat floatFormat = FloatFormat.Decimal, UnknownNumberFormat unknownNumberFormat = UnknownNumberFormat.Error, DetectDateTime detectDateTimeOffset = DetectDateTime.None, ObjectFormat objectFormat = ObjectFormat.Dictionary)
+    public ObjectAsPrimitiveConverter(
+        FloatFormat floatFormat = FloatFormat.Decimal,
+        UnknownNumberFormat unknownNumberFormat = UnknownNumberFormat.Error,
+        DetectDateTime detectDateTime = DetectDateTime.None,
+        ObjectFormat objectFormat = ObjectFormat.Dictionary)
     {
         FloatFormat = floatFormat;
         UnknownNumberFormat = unknownNumberFormat;
-        DetectDateTimeOffset = detectDateTimeOffset;
+        DetectDateTime = detectDateTime;
         ObjectFormat = objectFormat;
     }
 
@@ -323,33 +328,4 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     private static partial Regex DateTimeOffsetRegex();
 
     #endregion
-}
-
-public enum FloatFormat
-{
-    Double,
-    Decimal,
-    Float
-}
-
-public enum UnknownNumberFormat
-{
-    Error,
-    JsonElement
-}
-
-public enum ObjectFormat
-{
-    Dictionary,
-    Expando
-}
-
-[Flags]
-public enum DetectDateTime
-{
-    None = 0,
-    DateTimeOffset = 1,
-    DateTime = 2,
-    DateOnly = 4,
-    TimeOnly = 8
 }
