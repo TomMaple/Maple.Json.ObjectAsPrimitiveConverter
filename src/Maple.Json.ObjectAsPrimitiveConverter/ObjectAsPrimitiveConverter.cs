@@ -231,7 +231,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         if (stringValue is not { Length: > 2 and < 60 })
             return false;
 
-        // Every detectable format contains at least one digit, so bail out before touching any regex or parser.
+        // Every detectable format contains at least one digit, so bail out before touching any regex or parser
         if (!stringValue.AsSpan().ContainsAny("0123456789"))
             return false;
 
