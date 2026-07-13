@@ -2,7 +2,7 @@
 ## Definition
 Namespace: [Maple.Json.ObjectAsPrimitiveConverter](../namespace.md)<br>
 Assembly: Maple.Json.ObjectAsPrimitiveConverter.dll<br>
-Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Maple.Json.ObjectAsPrimitiveConverter.cs" target="_blank">ObjectAsPrimitiveConverter.cs</a>
+Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter.cs" target="_blank">ObjectAsPrimitiveConverter.cs</a>
 
 A JSON converter that can serialize and deserialize objects as their primitive types.
 
@@ -38,3 +38,6 @@ It is based on the implementation from: https://stackoverflow.com/a/65974452.
 
 ## See Also
 * [Maple.Json.ObjectAsPrimitiveConverter.Configuration namespace](../Configuration/namespace.md)
+* [JSON serialization and deserialization in .NET - overview](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/overview)
+* [System.Text.Json](https://learn.microsoft.com/en-us/dotnet/api/system.text.json)
+* [System.Text.Json NuGet package](https://www.nuget.org/packages/System.Text.Json)

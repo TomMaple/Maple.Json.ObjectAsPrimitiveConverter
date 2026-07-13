@@ -25,14 +25,14 @@ Consider the following JSON as an example:
 ```
 
 When using *System.Text.Json* to deserialize this JSON to an `object`, the result value will look like this:
-![Serialization to object result](./.resources/standard_object.png)
+![Serialization to object result](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/.resources/standard_object.png)
 
 
 When using *System.Text.Json* to deserialize this JSON to an `IDictionary<string, object>`, the result value will look like this:
-![Serialization to dictionary result](./.resources/standard_dictionary.png)
+![Serialization to dictionary result](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/.resources/standard_dictionary.png)
 
 When using *System.Text.Json* to deserialize this JSON to an `object` with the `ObjectAsPrimitiveConverter`, the result value will look like this:
-![Serialization to object with converter result](./.resources/converter.png)
+![Serialization to object with converter result](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/.resources/converter.png)
 
 # Quick Start
 ## Adding the *NuGet* package
@@ -86,7 +86,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =
 
 ## Configuration
 ```csharp
-new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeOffset, objectFormat);
+new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTime, objectFormat);
 ```
 
 ### Detect date-time
@@ -108,7 +108,7 @@ new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeO
 ### Object format
 | Name | Value | Description |
 | ---- | ----- | ----------- |
-| Dictionary | 0 | Serialize an object as a [System.Collections.Generic.Dictionary&lt;string, object&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.idictionary-2) value. |
+| Dictionary | 0 | Serialize an object as a [System.Collections.Generic.IDictionary&lt;string, object&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.idictionary-2) value. |
 | Expando| 1 | Serialize an object as a [System.Dynamic.ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) value. |
 
 # Unknown number format
@@ -116,3 +116,13 @@ new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeO
 | ---- | ----- | ----------- |
 | Error | 0 | Throw an exception when an unknown number format is detected. |
 | JsonElement | 1 | Serialize an unknown number format as a [System.Text.Json.JsonElement](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonelement) (`JsonElement`) value. |
+
+# Learn More
+## Documentation
+* [Maple.Json.ObjectAsPrimitiveConverter](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/docs/Reference/namespace.md)
+* [Maple.Json.ObjectAsPrimitiveConverter.Configuration](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/docs/Reference/Configuration/namespace.md)
+
+## See also
+* [JSON serialization and deserialization in .NET - overview](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/overview)
+* [System.Text.Json](https://learn.microsoft.com/en-us/dotnet/api/system.text.json)
+* [System.Text.Json NuGet package](https://www.nuget.org/packages/System.Text.Json)

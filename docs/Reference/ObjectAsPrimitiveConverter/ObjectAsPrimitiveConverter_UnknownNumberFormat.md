@@ -11,7 +11,8 @@ public UnknownNumberFormat UnknownNumberFormat { get; init; }
 ```
 
 ### Property Value
-[UnknownNumberFormat](../Configuration/UnknownNumberFormat
+[UnknownNumberFormat](../Configuration/UnknownNumberFormat.md)
+
 Specifies the behavior when encountering a number format that is not recognized.
 
 ## Remarks

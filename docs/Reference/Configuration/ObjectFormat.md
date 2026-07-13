@@ -15,7 +15,7 @@ Inheritance [Object](https://learn.microsoft.com/dotnet/api/system.object) → [
 ## Fields
 | Name | Value | Description |
 | ---- | ----- | ----------- |
-| Dictionary | 0 | Serialize an object as a [System.Collections.Generic.Dictionary&lt;string, object&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.idictionary-2) value. |
+| Dictionary | 0 | Serialize an object as a [System.Collections.Generic.IDictionary&lt;string, object&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.idictionary-2) value. |
 | Expando| 1 | Serialize an object as a [System.Dynamic.ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) value. |
 
 ## See Also

@@ -7,11 +7,11 @@ Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConvert
 Gets or sets the format to use when converting objects to primitive types.
 
 ```csharp
-public DetectDateTime ObjectFormat { get; init; }
+public ObjectFormat ObjectFormat { get; init; }
 ```
 
 ### Property Value
-[DetectDateTime](../Configuration/DetectDateTime.md)
+[ObjectFormat](../Configuration/ObjectFormat.md)
 
 Specifies the format to use when converting objects to primitive types.
 
