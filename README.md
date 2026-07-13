@@ -86,7 +86,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =
 
 ## Configuration
 ```csharp
-new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeOffset, objectFormat);
+new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTime, objectFormat);
 ```
 
 ### Detect date-time
@@ -108,7 +108,7 @@ new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeO
 ### Object format
 | Name | Value | Description |
 | ---- | ----- | ----------- |
-| Dictionary | 0 | Serialize an object as a [System.Collections.Generic.Dictionary&lt;string, object&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.idictionary-2) value. |
+| Dictionary | 0 | Serialize an object as a [System.Collections.Generic.IDictionary&lt;string, object&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.idictionary-2) value. |
 | Expando| 1 | Serialize an object as a [System.Dynamic.ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) value. |
 
 # Unknown number format
