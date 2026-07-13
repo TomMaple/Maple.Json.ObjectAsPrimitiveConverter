@@ -119,8 +119,8 @@ new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeO
 
 # Learn More
 ## Documentation
-* [Maple.Json.ObjectAsPrimitiveConverter](docs/Reference/namespace.md)
-* [Maple.Json.ObjectAsPrimitiveConverter.Configuration](docs/Reference/Configuration/namespace.md)
+* [Maple.Json.ObjectAsPrimitiveConverter](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/docs/Reference/namespace.md)
+* [Maple.Json.ObjectAsPrimitiveConverter.Configuration](https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/docs/Reference/Configuration/namespace.md)
 
 ## See also
 * [JSON serialization and deserialization in .NET - overview](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/overview)
