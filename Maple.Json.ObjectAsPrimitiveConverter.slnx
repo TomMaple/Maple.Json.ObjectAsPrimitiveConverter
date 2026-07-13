@@ -1,4 +1,14 @@
 <Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/build-and-publish.yml" />
+  </Folder>
+  <Folder Name="/.resources/">
+    <File Path=".resources/converter.png" />
+    <File Path=".resources/icon.png" />
+    <File Path=".resources/standard_dictionary.png" />
+    <File Path=".resources/standard_object.png" />
+  </Folder>
   <Folder Name="/docs/">
     <File Path="LICENSE" />
     <File Path="README.md" />
