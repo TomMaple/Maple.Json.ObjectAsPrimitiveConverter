@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+
+    <PackageId>Maple.Json.ObjectAsPrimitiveConverter</PackageId>
+    <Title>A System.Text.Json converter that allows to serialize and deserialize objects properties using primitive types.</Title>
+    <Description>A converter for System.Text Json that allows to serialize and deserialize objects properties using primitive types.</Description>
+    <Authors>Tom Maple</Authors>
+    <PublisherName>Tom Maple</PublisherName>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>JSON;JSON converter;converter;primitive types;System.Text.Json</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <PackageProjectUrl>https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\.resources\icon.png" Pack="true" PackagePath="" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

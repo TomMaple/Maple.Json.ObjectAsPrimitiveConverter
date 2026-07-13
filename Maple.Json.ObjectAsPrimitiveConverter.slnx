@@ -1,0 +1,40 @@
+<Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/build-and-publish.yml" />
+  </Folder>
+  <Folder Name="/.resources/">
+    <File Path=".resources/converter.png" />
+    <File Path=".resources/icon.png" />
+    <File Path=".resources/standard_dictionary.png" />
+    <File Path=".resources/standard_object.png" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/docs/Reference/">
+    <File Path="docs/Reference/namespace.md" />
+  </Folder>
+  <Folder Name="/docs/Reference/Configuration/">
+    <File Path="docs/Reference/Configuration/DetectDateTime.md" />
+    <File Path="docs/Reference/Configuration/FloatFormat.md" />
+    <File Path="docs/Reference/Configuration/namespace.md" />
+    <File Path="docs/Reference/Configuration/ObjectFormat.md" />
+    <File Path="docs/Reference/Configuration/UnknownNumberFormat.md" />
+  </Folder>
+  <Folder Name="/docs/Reference/ObjectAsPrimitiveConverter/">
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_constructor.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_DetectDateTime.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_FloatFormat.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_ObjectFormat.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_UnknownNumberFormat.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Maple.Json.ObjectAsPrimitiveConverter/Maple.Json.ObjectAsPrimitiveConverter.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Maple.Json.ObjectAsPrimitiveConverter.Tests.Unit/Maple.Json.ObjectAsPrimitiveConverter.Tests.Unit.csproj" Id="ef532974-c954-4165-94ff-2e31d54e693c" />
+  </Folder>
+</Solution>
