@@ -45,7 +45,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     /// </summary>
     /// <param name="floatFormat">Specifies the default type for floating-point numbers.</param>
     /// <param name="unknownNumberFormat">Specifies the behavior when encountering a number format that is not recognized.</param>
-    /// <param name="detectDateTime">Specifies whether to detect date-time values.</param>
+    /// <param name="detectDateTime">Specifies whether to detect date-time values and which formats to recognize.</param>
     /// <param name="objectFormat">Specifies the format to use when converting objects to primitive types.</param>
     public ObjectAsPrimitiveConverter(
         FloatFormat floatFormat = FloatFormat.Decimal,
@@ -62,25 +62,25 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     #endregion
 
     /// <summary>
-    ///     The type for floating-point numbers.
-    /// </summary>
-    public FloatFormat FloatFormat { get; init; }
-
-    /// <summary>
-    ///     The behavior when encountering a number format that is not recognized.
-    /// </summary>
-    public UnknownNumberFormat UnknownNumberFormat { get; init; }
-
-    /// <summary>
     ///     A bitwise combination of the enumeration values that specifies which date and time representations
     ///     to detect when converting text properties to primitive types.
     /// </summary>
     public DetectDateTime DetectDateTime { get; init; }
 
     /// <summary>
+    ///     The type for floating-point numbers.
+    /// </summary>
+    public FloatFormat FloatFormat { get; init; }
+
+    /// <summary>
     ///     The type to use when converting objects to primitive types.
     /// </summary>
     public ObjectFormat ObjectFormat { get; init; }
+
+    /// <summary>
+    ///     The behavior when encountering a number format that is not recognized.
+    /// </summary>
+    public UnknownNumberFormat UnknownNumberFormat { get; init; }
 
     /// <inheritdoc />
     public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
