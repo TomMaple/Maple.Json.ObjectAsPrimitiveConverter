@@ -323,22 +323,10 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
             return true;
         }
 
-
-        if (reader.HasValueSequence)
+        if (BigInteger.TryParse(textValue, out var bigInt))
         {
-            if (BigInteger.TryParse(textValue, out var bitInt))
-            {
-                integerValue = bitInt;
-                return true;
-            }
-        }
-        else
-        {
-            if (BigInteger.TryParse(textValue, out var bitInt))
-            {
-                integerValue = bitInt;
-                return true;
-            }
+            integerValue = bigInt;
+            return true;
         }
 
         integerValue = null;
