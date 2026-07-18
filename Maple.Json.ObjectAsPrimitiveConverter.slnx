@@ -2,6 +2,7 @@
   <Folder Name="/.github/" />
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/build-and-publish.yml" />
+    <File Path=".github/workflows/codeql.yml" />
   </Folder>
   <Folder Name="/.resources/">
     <File Path=".resources/converter.png" />
