@@ -105,6 +105,42 @@ public class ObjectAsPrimitiveConverterUnitTests
     }
 
     [Fact]
+    public void Read_ObjectWithTrailingCommentAndCommentsAllowed_ReturnsObject()
+    {
+        // Arrange
+
+        // JsonSerializerOptions rejects ReadCommentHandling.Allow, so the converter's Comment-token
+        // handling is only reachable by driving a Utf8JsonReader directly with comments allowed.
+        const string json = """
+                            {
+                              "Property1": "Value",
+                              "Property2": 123
+                              // trailing comment before the closing brace
+                            }
+                            """;
+
+        var converter = new ObjectAsPrimitiveConverter();
+        var reader = new Utf8JsonReader(
+            System.Text.Encoding.UTF8.GetBytes(json),
+            new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+
+        reader.Read();
+
+        // Act
+        var result = converter.Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<Dictionary<string, object>>();
+
+        var dictionary = (Dictionary<string, object>)result;
+        dictionary.ShouldContainKey("Property1");
+        dictionary["Property1"].ShouldBe("Value");
+        dictionary.ShouldContainKey("Property2");
+        dictionary["Property2"].ShouldBe(123);
+    }
+
+    [Fact]
     public void Deserialize_ValidJsonWithCommentsAndCommentsDisabled_ThrowsException()
     {
         // Arrange
@@ -250,6 +286,146 @@ public class ObjectAsPrimitiveConverterUnitTests
         dictionary.ShouldContainKey("BigIntegerProperty");
         dictionary["BigIntegerProperty"].ShouldBeOfType<BigInteger>();
         ((BigInteger)dictionary["BigIntegerProperty"]).ToString().ShouldBe("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+    }
+
+    [Theory]
+    [InlineData("123456789012345678901234567890", typeof(BigInteger))]
+    [InlineData("123.456", typeof(decimal))]
+    public void Read_NumberSplitAcrossBufferSegments_ParsesUsingDecodedText(string number, Type expectedType)
+    {
+        // Arrange
+
+        // When a number token straddles two buffer segments, reader.HasValueSequence is true and the
+        // converter must decode reader.ValueSequence (not call ToString() on it, which yields the type name).
+        var bytes = System.Text.Encoding.UTF8.GetBytes(number);
+        var splitAt = bytes.Length / 2;
+        var first = new BufferSegment(bytes.AsMemory(0, splitAt));
+        var last = first.Append(bytes.AsMemory(splitAt));
+        var sequence = new System.Buffers.ReadOnlySequence<byte>(first, 0, last, last.Memory.Length);
+
+        var reader = new Utf8JsonReader(sequence);
+        reader.Read();
+        reader.HasValueSequence.ShouldBeTrue();
+
+        // Act
+        var result = new ObjectAsPrimitiveConverter().Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType(expectedType);
+        result.ToString().ShouldBe(number);
+    }
+
+    [Theory]
+    [InlineData("1e5", 100000)]
+    [InlineData("2E3", 2000)]
+    [InlineData("-3e2", -300)]
+    [InlineData("5e-1", 0.5)]
+    [InlineData("1.5e3", 1500)]
+    public void Deserialize_NumberInExponentNotation_ReturnsFloatingPointValue(string number, double expected)
+    {
+        // Arrange
+
+        // Exponent-notation numbers without a decimal point (e.g. "1e5") are valid JSON numbers but were
+        // previously misrouted to the integer parsers, which reject exponents, and threw "Cannot parse number".
+        var json = $$"""{"Property":{{number}}}""";
+
+        // Act
+        var result = JsonSerializer.Deserialize<object>(json, GetOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<Dictionary<string, object>>();
+
+        var dictionary = (Dictionary<string, object>)result;
+        dictionary.ShouldContainKey("Property");
+        dictionary["Property"].ShouldBeOfType<decimal>();
+        dictionary["Property"].ShouldBe((decimal)expected);
+    }
+
+    [Fact]
+    public void Read_ArrayWithCommentBetweenElementsAndCommentsAllowed_ReturnsArrayWithoutComment()
+    {
+        // Arrange
+
+        // JsonSerializerOptions rejects ReadCommentHandling.Allow, so the converter's Comment-token
+        // handling inside arrays is only reachable by driving a Utf8JsonReader directly with comments allowed.
+        // A comment between array elements must be skipped, not added as a null element.
+        const string json = "[1, /* comment */ 2, 3]";
+
+        var converter = new ObjectAsPrimitiveConverter();
+        var reader = new Utf8JsonReader(
+            System.Text.Encoding.UTF8.GetBytes(json),
+            new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+
+        reader.Read();
+
+        // Act
+        var result = converter.Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<object[]>();
+
+        var array = (object[])result;
+        array.Length.ShouldBe(3);
+        array[0].ShouldBe(1);
+        array[1].ShouldBe(2);
+        array[2].ShouldBe(3);
+    }
+
+    [Fact]
+    public void Read_ArrayTruncatedWhileSkippingTrailingComment_StopsWithoutSpuriousElement()
+    {
+        // Arrange
+
+        // With isFinalBlock: false, reader.Read() returns false (instead of throwing) when it runs out of
+        // data mid-stream. If that happens while the converter is skipping a comment, the leftover Comment
+        // token must not be mapped to a null array element.
+        const string json = "[1, /* trailing */";
+
+        var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+        var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(json), isFinalBlock: false, state);
+
+        reader.Read();
+
+        // Act
+        var result = new ObjectAsPrimitiveConverter().Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<object[]>();
+
+        var array = (object[])result;
+        array.Length.ShouldBe(1);
+        array[0].ShouldBe(1);
+    }
+
+    [Fact]
+    public void Read_ObjectTruncatedWhileSkippingTrailingComment_StopsWithoutError()
+    {
+        // Arrange
+
+        // With isFinalBlock: false, reader.Read() returns false (instead of throwing) when it runs out of
+        // data mid-stream. If that happens while the converter is skipping a comment, the leftover Comment
+        // token must not be treated as an unexpected token and throw.
+        const string json = """{"Property":1, /* trailing */""";
+
+        var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+        var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(json), isFinalBlock: false, state);
+
+        reader.Read();
+
+        // Act
+        var result = new ObjectAsPrimitiveConverter().Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<Dictionary<string, object>>();
+
+        var dictionary = (Dictionary<string, object>)result;
+        dictionary.ShouldContainKey("Property");
+        dictionary["Property"].ShouldBe(1);
     }
 
     #endregion
@@ -1251,6 +1427,84 @@ public class ObjectAsPrimitiveConverterUnitTests
 
     #endregion
 
+    #region Write
+
+    [Fact]
+    public void Serialize_NullValue_WritesNull()
+    {
+        // Act
+        var result = JsonSerializer.Serialize<object?>(null, GetOptions());
+
+        // Assert
+        result.ShouldBe("null");
+    }
+
+    [Fact]
+    public void Serialize_BareObject_WritesEmptyJsonObject()
+    {
+        // Arrange
+
+        // A value whose runtime type is exactly System.Object cannot be serialized by the default
+        // machinery, so the converter emits an empty JSON object for it.
+        var value = new object();
+
+        // Act
+        var result = JsonSerializer.Serialize(value, GetOptions());
+
+        // Assert
+        result.ShouldBe("{}");
+    }
+
+    [Fact]
+    public void Serialize_Dictionary_WritesJsonObjectWithPrimitiveValues()
+    {
+        // Arrange
+        var value = new Dictionary<string, object?>
+        {
+            ["StringProperty"] = "Hello, World!",
+            ["IntProperty"] = -234,
+            ["DecimalProperty"] = 123.456m,
+            ["BoolProperty"] = true,
+            ["NullProperty"] = null
+        };
+
+        // Act
+        var result = JsonSerializer.Serialize<object>(value, GetOptions());
+
+        // Assert
+        result.ShouldBe("""{"StringProperty":"Hello, World!","IntProperty":-234,"DecimalProperty":123.456,"BoolProperty":true,"NullProperty":null}""");
+    }
+
+    [Fact]
+    public void Serialize_ObjectArray_WritesJsonArrayWithPrimitiveValues()
+    {
+        // Arrange
+        var value = new object?[] { 1, "abc", true, null };
+
+        // Act
+        var result = JsonSerializer.Serialize<object>(value, GetOptions());
+
+        // Assert
+        result.ShouldBe("""[1,"abc",true,null]""");
+    }
+
+    [Fact]
+    public void Serialize_DeserializedObject_ReturnsOriginalJson()
+    {
+        // Arrange
+        const string json = """{"StringProperty":"Hello, World!","IntProperty":-234,"DecimalProperty":123.456,"ArrayProperty":[1,"abc",true]}""";
+        var options = GetOptions();
+        var deserialized = JsonSerializer.Deserialize<object>(json, options);
+
+        // Act
+        var result = JsonSerializer.Serialize(deserialized, options);
+
+        // Assert
+        result.ShouldBe(json);
+    }
+
+    #endregion
+
     #region helper methods
 
     private static JsonSerializerOptions GetOptions(FloatFormat floatFormat = FloatFormat.Decimal, UnknownNumberFormat unknownNumberFormat = UnknownNumberFormat.Error, DetectDateTime detectDateTimeOffset = DetectDateTime.None, ObjectFormat objectFormat = ObjectFormat.Dictionary, JsonCommentHandling commentHandling = JsonCommentHandling.Disallow)
@@ -1263,6 +1517,26 @@ public class ObjectAsPrimitiveConverterUnitTests
                 new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeOffset, objectFormat)
             }
         };
+    }
+
+    #endregion
+
+    #region helper types
+
+    /// <summary>
+    ///     A linked <see cref="System.Buffers.ReadOnlySequenceSegment{T}" /> used to build a multi-segment
+    ///     <see cref="System.Buffers.ReadOnlySequence{T}" /> so that <c>Utf8JsonReader.HasValueSequence</c> is exercised.
+    /// </summary>
+    private sealed class BufferSegment : System.Buffers.ReadOnlySequenceSegment<byte>
+    {
+        public BufferSegment(ReadOnlyMemory<byte> memory) => Memory = memory;
+
+        public BufferSegment Append(ReadOnlyMemory<byte> memory)
+        {
+            var segment = new BufferSegment(memory) { RunningIndex = RunningIndex + Memory.Length };
+            Next = segment;
+            return segment;
+        }
     }
 
     #endregion

@@ -2,7 +2,7 @@
 ## Definition
 Namespace: [Maple.Json.ObjectAsPrimitiveConverter.Configuration](namespace.md)<br>
 Assembly: Maple.Json.ObjectAsPrimitiveConverter.dll<br>
-Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Configuration/ObjectFormat.cs" target="_blank">ObjectFormat.cs</a>
+Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Configuration/ObjectFormat.cs#L19" target="_blank">ObjectFormat.cs</a>
 
 Specifies the format to use when converting objects to primitive types.
 

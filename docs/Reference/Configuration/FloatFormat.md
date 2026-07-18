@@ -2,7 +2,7 @@
 ## Definition
 Namespace: [Maple.Json.ObjectAsPrimitiveConverter.Configuration](namespace.md)<br>
 Assembly: Maple.Json.ObjectAsPrimitiveConverter.dll<br>
-Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Configuration/FloatFormat.cs" target="_blank">FloatFormat.cs</a>
+Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Configuration/FloatFormat.cs#L19" target="_blank">FloatFormat.cs</a>
 
 Specifies the desired format for floating-point numbers when converting objects to primitive types.
 

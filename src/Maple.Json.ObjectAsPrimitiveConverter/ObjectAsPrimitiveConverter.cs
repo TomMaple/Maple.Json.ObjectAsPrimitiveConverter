@@ -17,6 +17,7 @@
 // ReSharper disable UnusedMember.Global
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
@@ -37,6 +38,12 @@ namespace Maple.Json.ObjectAsPrimitiveConverter;
 /// <remarks>Based on the implementation from: https://stackoverflow.com/a/65974452</remarks>
 public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 {
+    #region consts
+
+    private static readonly SearchValues<char> DigitSearchValues = SearchValues.Create("0123456789");
+
+    #endregion
+
     #region constructors
 
     /// <summary>
@@ -99,25 +106,24 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 return true;
 
             case JsonTokenType.String:
-                if (TryGetDateTime(ref reader, out var dtValue))
+            {
+                var stringValue = reader.GetString();
+                if (TryGetDateTime(stringValue, out var dtValue))
                     return dtValue;
 
-                return reader.GetString();
+                return stringValue;
+            }
 
             case JsonTokenType.Number:
             {
-                var textValue = reader.HasValueSequence
-                    ? reader.ValueSequence.ToString()
-                    : Encoding.UTF8.GetString(reader.ValueSpan);
-
-                if (textValue.Contains("."))
+                if (NumberIsFloatingPoint(ref reader))
                 {
-                    if (TryGetFloat(reader, out var floatValue))
+                    if (TryGetFloat(ref reader, out var floatValue))
                         return floatValue;
                 }
                 else
                 {
-                    if (TryGetInteger(reader, textValue, out var result))
+                    if (TryGetInteger(ref reader, out var result))
                         return result;
                 }
 
@@ -126,7 +132,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 if (UnknownNumberFormat is UnknownNumberFormat.JsonElement)
                     return doc.RootElement.Clone();
 
-                throw new JsonException($"Cannot parse number: ‘{doc.RootElement.ToString()}’");
+                throw new JsonException($"Cannot parse number: ‘{doc.RootElement}’");
             }
 
             case JsonTokenType.StartArray:
@@ -134,6 +140,16 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 var list = new List<object?>();
                 while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
                 {
+                    while (reader.TokenType == JsonTokenType.Comment && reader.Read())
+                    {
+                        // Skip comments
+                    }
+
+                    // A leftover Comment token means reader.Read() ran out of data while skipping
+                    // comments (truncated/streamed input); stop instead of mapping it to a null element.
+                    if (reader.TokenType is JsonTokenType.EndArray or JsonTokenType.Comment)
+                        break;
+
                     var item = Read(ref reader, typeof(object), options);
                     list.Add(item);
                 }
@@ -146,8 +162,15 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 var dict = CreateDictionary();
                 while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
                 {
-                    while (reader.TokenType == JsonTokenType.Comment)
-                        reader.Read();
+                    while (reader.TokenType == JsonTokenType.Comment && reader.Read())
+                    {
+                        // Skip comments
+                    }
+
+                    // A leftover Comment token means reader.Read() ran out of data while skipping
+                    // comments (truncated/streamed input); stop instead of failing on the comment.
+                    if (reader.TokenType is JsonTokenType.EndObject or JsonTokenType.Comment)
+                        break;
 
                     if (reader.TokenType == JsonTokenType.Null)
                         continue;
@@ -156,7 +179,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                     {
                         using var doc = JsonDocument.ParseValue(ref reader);
 
-                        throw new JsonException($"Cannot parse object “{doc.RootElement.ToString()}”!");
+                        throw new JsonException($"Cannot parse object “{doc.RootElement}”!");
                     }
 
                     var key = reader.GetString() ?? string.Empty;
@@ -220,19 +243,18 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         return TimeOnlyRegex().IsMatch(value);
     }
 
-    private bool TryGetDateTime(ref Utf8JsonReader reader, [NotNullWhen(true)] out object? value)
+    private bool TryGetDateTime(string? stringValue, [NotNullWhen(true)] out object? value)
     {
         value = null;
 
-        if (reader.TokenType != JsonTokenType.String || DetectDateTime == DetectDateTime.None)
+        if (DetectDateTime == DetectDateTime.None)
             return false;
 
-        var stringValue = reader.GetString();
         if (stringValue is not { Length: > 2 and < 60 })
             return false;
 
         // Every detectable format contains at least one digit, so bail out before touching any regex or parser
-        if (!stringValue.AsSpan().ContainsAny("0123456789"))
+        if (!stringValue.AsSpan().ContainsAny(DigitSearchValues))
             return false;
 
         // Try to parse the string as a DateTimeOffset, DateTime, DateOnly, or TimeOnly based on the DetectDateTime flags
@@ -272,7 +294,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         return false;
     }
 
-    private bool TryGetFloat(Utf8JsonReader reader, [NotNullWhen(true)] out object? floatValue)
+    private bool TryGetFloat(ref Utf8JsonReader reader, [NotNullWhen(true)] out object? floatValue)
     {
         if (FloatFormat is FloatFormat.Decimal
             && reader.TryGetDecimal(out var dec))
@@ -301,8 +323,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         return false;
     }
 
-    private static bool TryGetInteger(Utf8JsonReader reader, string? textValue,
-        [NotNullWhen(true)] out object? integerValue)
+    private static bool TryGetInteger(ref Utf8JsonReader reader, [NotNullWhen(true)] out object? integerValue)
     {
         if (reader.TryGetInt32(out var int32))
         {
@@ -316,25 +337,41 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
             return true;
         }
 
+        // Only values that overflow Int64 reach this point, so the string allocation is rare.
+        var valueSpan = reader.HasValueSequence
+            ? reader.ValueSequence.ToArray()
+            : reader.ValueSpan;
 
-        if (reader.HasValueSequence)
+        var textValue = Encoding.UTF8.GetString(valueSpan);
+
+        if (BigInteger.TryParse(textValue, out var bigInt))
         {
-            if (BigInteger.TryParse(textValue, out var bitInt))
-            {
-                integerValue = bitInt;
-                return true;
-            }
-        }
-        else
-        {
-            if (BigInteger.TryParse(textValue, out var bitInt))
-            {
-                integerValue = bitInt;
-                return true;
-            }
+            integerValue = bigInt;
+            return true;
         }
 
         integerValue = null;
+        return false;
+    }
+
+    /// <summary>
+    ///     Determines whether the current JSON number token must be treated as a floating-point value by
+    ///     scanning its raw UTF-8 bytes for a decimal point or exponent (<c>.</c>, <c>e</c>, or <c>E</c>).
+    /// </summary>
+    /// <remarks>
+    ///     JSON numbers are ASCII, so the raw bytes can be inspected directly without decoding them to a string.
+    ///     Numbers written in exponent notation without a decimal point (e.g. <c>1e5</c> or <c>5e-1</c>) are
+    ///     floating-point and would otherwise be misrouted to the integer parsers, which reject exponents.
+    /// </remarks>
+    private static bool NumberIsFloatingPoint(ref Utf8JsonReader reader)
+    {
+        if (!reader.HasValueSequence)
+            return reader.ValueSpan.IndexOfAny((byte)'.', (byte)'e', (byte)'E') >= 0;
+
+        foreach (var segment in reader.ValueSequence)
+            if (segment.Span.IndexOfAny((byte)'.', (byte)'e', (byte)'E') >= 0)
+                return true;
+
         return false;
     }
 
@@ -349,7 +386,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     /// </summary>
     [GeneratedRegex(
         @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})\s*$",
-        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+        RegexOptions.IgnoreCase)]
     private static partial Regex DateOnlyRegex();
 
     /// <summary>
@@ -357,7 +394,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     ///     and AM/PM designator — e.g. "13:01:06", "13:01:06.0000000", "1:01 PM".
     /// </summary>
     [GeneratedRegex(@"^\s*\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*$",
-        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+        RegexOptions.IgnoreCase)]
     private static partial Regex TimeOnlyRegex();
 
     /// <summary>
@@ -366,7 +403,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     /// </summary>
     [GeneratedRegex(
         @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*$",
-        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+        RegexOptions.IgnoreCase)]
     private static partial Regex DateTimeRegex();
 
     /// <summary>
@@ -376,7 +413,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     /// </summary>
     [GeneratedRegex(
         @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*(?:Z|[+-][01]?\d(?::?[03]0)?)\s*$",
-        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+        RegexOptions.IgnoreCase)]
     private static partial Regex DateTimeOffsetRegex();
 
     #endregion
