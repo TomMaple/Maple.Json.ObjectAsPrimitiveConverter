@@ -106,10 +106,13 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 return true;
 
             case JsonTokenType.String:
-                if (TryGetDateTime(ref reader, out var dtValue))
+            {
+                var stringValue = reader.GetString();
+                if (TryGetDateTime(stringValue, out var dtValue))
                     return dtValue;
 
-                return reader.GetString();
+                return stringValue;
+            }
 
             case JsonTokenType.Number:
             {
@@ -232,14 +235,13 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         return TimeOnlyRegex().IsMatch(value);
     }
 
-    private bool TryGetDateTime(ref Utf8JsonReader reader, [NotNullWhen(true)] out object? value)
+    private bool TryGetDateTime(string? stringValue, [NotNullWhen(true)] out object? value)
     {
         value = null;
 
-        if (reader.TokenType != JsonTokenType.String || DetectDateTime == DetectDateTime.None)
+        if (DetectDateTime == DetectDateTime.None)
             return false;
 
-        var stringValue = reader.GetString();
         if (stringValue is not { Length: > 2 and < 60 })
             return false;
 
