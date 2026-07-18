@@ -142,6 +142,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 {
                     while (reader.TokenType == JsonTokenType.Comment && reader.Read())
                     {
+                        // Skip comments
                     }
 
                     // A leftover Comment token means reader.Read() ran out of data while skipping
@@ -163,6 +164,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 {
                     while (reader.TokenType == JsonTokenType.Comment && reader.Read())
                     {
+                        // Skip comments
                     }
 
                     // A leftover Comment token means reader.Read() ran out of data while skipping
