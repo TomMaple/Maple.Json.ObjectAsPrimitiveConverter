@@ -1373,6 +1373,84 @@ public class ObjectAsPrimitiveConverterUnitTests
 
     #endregion
 
+    #region Write
+
+    [Fact]
+    public void Serialize_NullValue_WritesNull()
+    {
+        // Act
+        var result = JsonSerializer.Serialize<object?>(null, GetOptions());
+
+        // Assert
+        result.ShouldBe("null");
+    }
+
+    [Fact]
+    public void Serialize_BareObject_WritesEmptyJsonObject()
+    {
+        // Arrange
+
+        // A value whose runtime type is exactly System.Object cannot be serialized by the default
+        // machinery, so the converter emits an empty JSON object for it.
+        var value = new object();
+
+        // Act
+        var result = JsonSerializer.Serialize(value, GetOptions());
+
+        // Assert
+        result.ShouldBe("{}");
+    }
+
+    [Fact]
+    public void Serialize_Dictionary_WritesJsonObjectWithPrimitiveValues()
+    {
+        // Arrange
+        var value = new Dictionary<string, object?>
+        {
+            ["StringProperty"] = "Hello, World!",
+            ["IntProperty"] = -234,
+            ["DecimalProperty"] = 123.456m,
+            ["BoolProperty"] = true,
+            ["NullProperty"] = null
+        };
+
+        // Act
+        var result = JsonSerializer.Serialize<object>(value, GetOptions());
+
+        // Assert
+        result.ShouldBe("""{"StringProperty":"Hello, World!","IntProperty":-234,"DecimalProperty":123.456,"BoolProperty":true,"NullProperty":null}""");
+    }
+
+    [Fact]
+    public void Serialize_ObjectArray_WritesJsonArrayWithPrimitiveValues()
+    {
+        // Arrange
+        var value = new object?[] { 1, "abc", true, null };
+
+        // Act
+        var result = JsonSerializer.Serialize<object>(value, GetOptions());
+
+        // Assert
+        result.ShouldBe("""[1,"abc",true,null]""");
+    }
+
+    [Fact]
+    public void Serialize_DeserializedObject_ReturnsOriginalJson()
+    {
+        // Arrange
+        const string json = """{"StringProperty":"Hello, World!","IntProperty":-234,"DecimalProperty":123.456,"ArrayProperty":[1,"abc",true]}""";
+        var options = GetOptions();
+        var deserialized = JsonSerializer.Deserialize<object>(json, options);
+
+        // Act
+        var result = JsonSerializer.Serialize(deserialized, options);
+
+        // Assert
+        result.ShouldBe(json);
+    }
+
+    #endregion
+
     #region helper methods
 
     private static JsonSerializerOptions GetOptions(FloatFormat floatFormat = FloatFormat.Decimal, UnknownNumberFormat unknownNumberFormat = UnknownNumberFormat.Error, DetectDateTime detectDateTimeOffset = DetectDateTime.None, ObjectFormat objectFormat = ObjectFormat.Dictionary, JsonCommentHandling commentHandling = JsonCommentHandling.Disallow)
