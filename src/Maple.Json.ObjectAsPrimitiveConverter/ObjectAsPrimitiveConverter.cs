@@ -356,7 +356,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     /// </summary>
     [GeneratedRegex(
         @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})\s*$",
-        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+        RegexOptions.IgnoreCase)]
     private static partial Regex DateOnlyRegex();
 
     /// <summary>
@@ -364,7 +364,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     ///     and AM/PM designator — e.g. "13:01:06", "13:01:06.0000000", "1:01 PM".
     /// </summary>
     [GeneratedRegex(@"^\s*\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*$",
-        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+        RegexOptions.IgnoreCase)]
     private static partial Regex TimeOnlyRegex();
 
     /// <summary>
@@ -373,7 +373,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     /// </summary>
     [GeneratedRegex(
         @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*$",
-        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+        RegexOptions.IgnoreCase)]
     private static partial Regex DateTimeRegex();
 
     /// <summary>
@@ -383,7 +383,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
     /// </summary>
     [GeneratedRegex(
         @"^\s*(?:[12]\d{3}[-/][01]?\d[-/][0-3]?\d|(?:[A-Za-z]{3,}\s+)?[A-Za-z]{3,}\s+[0-3]?\d\s+[12]\d{3})[T\s]+\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(?:AM|PM)?\s*(?:Z|[+-][01]?\d(?::?[03]0)?)\s*$",
-        RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
+        RegexOptions.IgnoreCase)]
     private static partial Regex DateTimeOffsetRegex();
 
     #endregion
