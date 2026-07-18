@@ -343,6 +343,37 @@ public class ObjectAsPrimitiveConverterUnitTests
         dictionary["Property"].ShouldBe((decimal)expected);
     }
 
+    [Fact]
+    public void Read_ArrayWithCommentBetweenElementsAndCommentsAllowed_ReturnsArrayWithoutComment()
+    {
+        // Arrange
+
+        // JsonSerializerOptions rejects ReadCommentHandling.Allow, so the converter's Comment-token
+        // handling inside arrays is only reachable by driving a Utf8JsonReader directly with comments allowed.
+        // A comment between array elements must be skipped, not added as a null element.
+        const string json = "[1, /* comment */ 2, 3]";
+
+        var converter = new ObjectAsPrimitiveConverter();
+        var reader = new Utf8JsonReader(
+            System.Text.Encoding.UTF8.GetBytes(json),
+            new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+
+        reader.Read();
+
+        // Act
+        var result = converter.Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<object[]>();
+
+        var array = (object[])result;
+        array.Length.ShouldBe(3);
+        array[0].ShouldBe(1);
+        array[1].ShouldBe(2);
+        array[2].ShouldBe(3);
+    }
+
     #endregion
 
     #region FloatFormat settings

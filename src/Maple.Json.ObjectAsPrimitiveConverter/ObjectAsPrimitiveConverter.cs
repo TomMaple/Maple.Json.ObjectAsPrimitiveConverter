@@ -137,6 +137,12 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 var list = new List<object?>();
                 while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
                 {
+                    while (reader.TokenType == JsonTokenType.Comment)
+                        reader.Read();
+
+                    if (reader.TokenType == JsonTokenType.EndArray)
+                        break;
+
                     var item = Read(ref reader, typeof(object), options);
                     list.Add(item);
                 }
