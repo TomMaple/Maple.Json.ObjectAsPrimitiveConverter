@@ -32,7 +32,9 @@
     <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_DetectDateTime.md" />
     <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_FloatFormat.md" />
     <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_ObjectFormat.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_Read.md" />
     <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_UnknownNumberFormat.md" />
+    <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_Write.md" />
   </Folder>
   <Folder Name="/root/">
     <File Path=".gitattributes" />

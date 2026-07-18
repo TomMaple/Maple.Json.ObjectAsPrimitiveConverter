@@ -111,11 +111,45 @@ new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTime,
 | Dictionary | 0 | Serialize an object as a [System.Collections.Generic.IDictionary&lt;string, object&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.idictionary-2) value. |
 | Expando| 1 | Serialize an object as a [System.Dynamic.ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) value. |
 
-# Unknown number format
+### Unknown number format
 | Name | Value | Description |
 | ---- | ----- | ----------- |
 | Error | 0 | Throw an exception when an unknown number format is detected. |
 | JsonElement | 1 | Serialize an unknown number format as a [System.Text.Json.JsonElement](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonelement) (`JsonElement`) value. |
+
+# Type mapping
+When deserializing with the `ObjectAsPrimitiveConverter`, each JSON value is converted to a CLR type as follows:
+
+| JSON value | CLR type |
+| ---------- | -------- |
+| `null` | `null` |
+| `true` / `false` | [System.Boolean](https://learn.microsoft.com/en-us/dotnet/api/system.boolean) (`bool`) |
+| String | [System.String](https://learn.microsoft.com/en-us/dotnet/api/system.string) (`string`), or a date/time type when [detection](#detect-date-time) is enabled and the value matches |
+| Integer number | The smallest of [System.Int32](https://learn.microsoft.com/en-us/dotnet/api/system.int32) (`int`), [System.Int64](https://learn.microsoft.com/en-us/dotnet/api/system.int64) (`long`), or [System.Numerics.BigInteger](https://learn.microsoft.com/en-us/dotnet/api/system.numerics.biginteger) (`BigInteger`) that can represent the value |
+| Floating-point number | `decimal`, `double`, or `float`, depending on the [Float format](#float-format) |
+| Number that cannot be represented | Throws, or produces a `JsonElement`, depending on the [Unknown number format](#unknown-number-format) |
+| Array | [System.Object](https://learn.microsoft.com/en-us/dotnet/api/system.object)`[]` (`object[]`) whose elements are converted using these same rules |
+| Object | An `IDictionary<string, object>` or an `ExpandoObject`, depending on the [Object format](#object-format), whose values are converted using the same rules |
+
+Integer numbers are widened only as needed: values that fit in `int` become `int`, larger values that fit in `long` become `long`, and values beyond `long` become `BigInteger`.
+
+A number is treated as floating-point when it contains a decimal point or an exponent, so values written in exponent notation without a decimal point (for example `1e5` or `5e-1`) are converted using the [Float format](#float-format).
+
+# Comments
+The converter honours the [ReadCommentHandling](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializeroptions.readcommenthandling) setting of the `JsonSerializerOptions`:
+
+* `JsonCommentHandling.Disallow` (the default) — a comment causes a `JsonException`.
+* `JsonCommentHandling.Skip` — comments are ignored, including comments between array elements, between object members, and immediately before a closing `]` or `}`.
+
+Comments never appear in the deserialized result.
+
+```csharp
+var result = JsonSerializer.Deserialize<object>(json, new JsonSerializerOptions
+{
+    ReadCommentHandling = JsonCommentHandling.Skip,
+    Converters = { new ObjectAsPrimitiveConverter() }
+});
+```
 
 # Learn More
 ## Documentation

@@ -2,7 +2,7 @@
 ## Definition
 Namespace: [Maple.Json.ObjectAsPrimitiveConverter.Configuration](namespace.md)<br>
 Assembly: Maple.Json.ObjectAsPrimitiveConverter.dll<br>
-Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Configuration/DetectDateTime.cs" target="_blank">DetectDateTime.cs</a>
+Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Configuration/DetectDateTime.cs#L25" target="_blank">DetectDateTime.cs</a>
 
 Specifies the types of date and time representations to detect when converting text properties to primitive types.
 

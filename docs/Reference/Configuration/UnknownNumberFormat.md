@@ -2,7 +2,7 @@
 ## Definition
 Namespace: [Maple.Json.ObjectAsPrimitiveConverter.Configuration](namespace.md)<br>
 Assembly: Maple.Json.ObjectAsPrimitiveConverter.dll<br>
-Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Configuration/UnknownNumberFormat.cs" target="_blank">UnknownNumberFormat.cs</a>
+Source: <a href="https://github.com/TomMaple/Maple.Json.ObjectAsPrimitiveConverter/blob/main/src/Maple.Json.ObjectAsPrimitiveConverter/Configuration/UnknownNumberFormat.cs#L19" target="_blank">UnknownNumberFormat.cs</a>
 
 Specifies the behavior when encountering a number format that is not recognized.
 
