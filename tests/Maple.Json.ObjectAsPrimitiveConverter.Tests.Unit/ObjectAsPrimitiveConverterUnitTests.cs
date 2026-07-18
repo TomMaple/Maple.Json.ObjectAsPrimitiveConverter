@@ -316,6 +316,33 @@ public class ObjectAsPrimitiveConverterUnitTests
         result.ToString().ShouldBe(number);
     }
 
+    [Theory]
+    [InlineData("1e5", 100000)]
+    [InlineData("2E3", 2000)]
+    [InlineData("-3e2", -300)]
+    [InlineData("5e-1", 0.5)]
+    [InlineData("1.5e3", 1500)]
+    public void Deserialize_NumberInExponentNotation_ReturnsFloatingPointValue(string number, double expected)
+    {
+        // Arrange
+
+        // Exponent-notation numbers without a decimal point (e.g. "1e5") are valid JSON numbers but were
+        // previously misrouted to the integer parsers, which reject exponents, and threw "Cannot parse number".
+        var json = $$"""{"Property":{{number}}}""";
+
+        // Act
+        var result = JsonSerializer.Deserialize<object>(json, GetOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<Dictionary<string, object>>();
+
+        var dictionary = (Dictionary<string, object>)result;
+        dictionary.ShouldContainKey("Property");
+        dictionary["Property"].ShouldBeOfType<decimal>();
+        dictionary["Property"].ShouldBe((decimal)expected);
+    }
+
     #endregion
 
     #region FloatFormat settings

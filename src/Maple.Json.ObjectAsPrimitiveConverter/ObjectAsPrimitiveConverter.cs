@@ -113,14 +113,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 
             case JsonTokenType.Number:
             {
-                // Extract the raw UTF-8 bytes of the JSON number
-                var valueSpan = reader.HasValueSequence
-                    ? reader.ValueSequence.ToArray()
-                    : reader.ValueSpan;
-
-                var textValue = Encoding.UTF8.GetString(valueSpan);
-
-                if (textValue.Contains('.'))
+                if (NumberIsFloatingPoint(ref reader))
                 {
                     if (TryGetFloat(ref reader, out var floatValue))
                         return floatValue;
@@ -342,6 +335,27 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         }
 
         integerValue = null;
+        return false;
+    }
+
+    /// <summary>
+    ///     Determines whether the current JSON number token must be treated as a floating-point value by
+    ///     scanning its raw UTF-8 bytes for a decimal point or exponent (<c>.</c>, <c>e</c>, or <c>E</c>).
+    /// </summary>
+    /// <remarks>
+    ///     JSON numbers are ASCII, so the raw bytes can be inspected directly without decoding them to a string.
+    ///     Numbers written in exponent notation without a decimal point (e.g. <c>1e5</c> or <c>5e-1</c>) are
+    ///     floating-point and would otherwise be misrouted to the integer parsers, which reject exponents.
+    /// </remarks>
+    private static bool NumberIsFloatingPoint(ref Utf8JsonReader reader)
+    {
+        if (!reader.HasValueSequence)
+            return reader.ValueSpan.IndexOfAny((byte)'.', (byte)'e', (byte)'E') >= 0;
+
+        foreach (var segment in reader.ValueSequence)
+            if (segment.Span.IndexOfAny((byte)'.', (byte)'e', (byte)'E') >= 0)
+                return true;
+
         return false;
     }
 
