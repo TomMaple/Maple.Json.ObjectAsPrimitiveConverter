@@ -34,6 +34,9 @@
     <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_ObjectFormat.md" />
     <File Path="docs/Reference/ObjectAsPrimitiveConverter/ObjectAsPrimitiveConverter_UnknownNumberFormat.md" />
   </Folder>
+  <Folder Name="/root/">
+    <File Path=".gitattributes" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Maple.Json.ObjectAsPrimitiveConverter/Maple.Json.ObjectAsPrimitiveConverter.csproj" />
   </Folder>
