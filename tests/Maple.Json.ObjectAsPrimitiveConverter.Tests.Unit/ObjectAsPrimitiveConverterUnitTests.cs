@@ -105,6 +105,42 @@ public class ObjectAsPrimitiveConverterUnitTests
     }
 
     [Fact]
+    public void Read_ObjectWithTrailingCommentAndCommentsAllowed_ReturnsObject()
+    {
+        // Arrange
+
+        // JsonSerializerOptions rejects ReadCommentHandling.Allow, so the converter's Comment-token
+        // handling is only reachable by driving a Utf8JsonReader directly with comments allowed.
+        const string json = """
+                            {
+                              "Property1": "Value",
+                              "Property2": 123
+                              // trailing comment before the closing brace
+                            }
+                            """;
+
+        var converter = new ObjectAsPrimitiveConverter();
+        var reader = new Utf8JsonReader(
+            System.Text.Encoding.UTF8.GetBytes(json),
+            new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+
+        reader.Read();
+
+        // Act
+        var result = converter.Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<Dictionary<string, object>>();
+
+        var dictionary = (Dictionary<string, object>)result;
+        dictionary.ShouldContainKey("Property1");
+        dictionary["Property1"].ShouldBe("Value");
+        dictionary.ShouldContainKey("Property2");
+        dictionary["Property2"].ShouldBe(123);
+    }
+
+    [Fact]
     public void Deserialize_ValidJsonWithCommentsAndCommentsDisabled_ThrowsException()
     {
         // Arrange

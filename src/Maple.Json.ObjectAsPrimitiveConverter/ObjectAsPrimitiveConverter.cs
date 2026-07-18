@@ -156,6 +156,9 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                     while (reader.TokenType == JsonTokenType.Comment)
                         reader.Read();
 
+                    if (reader.TokenType == JsonTokenType.EndObject)
+                        break;
+
                     if (reader.TokenType == JsonTokenType.Null)
                         continue;
 
