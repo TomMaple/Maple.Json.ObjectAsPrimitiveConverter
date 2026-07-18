@@ -288,6 +288,33 @@ public class ObjectAsPrimitiveConverterUnitTests
         ((BigInteger)dictionary["BigIntegerProperty"]).ToString().ShouldBe("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
     }
 
+    [Theory]
+    [InlineData("123456789012345678901234567890", typeof(BigInteger))]
+    [InlineData("123.456", typeof(decimal))]
+    public void Read_NumberSplitAcrossBufferSegments_ParsesUsingDecodedText(string number, Type expectedType)
+    {
+        // Arrange
+        // When a number token straddles two buffer segments, reader.HasValueSequence is true and the
+        // converter must decode reader.ValueSequence (not call ToString() on it, which yields the type name).
+        var bytes = System.Text.Encoding.UTF8.GetBytes(number);
+        var splitAt = bytes.Length / 2;
+        var first = new BufferSegment(bytes.AsMemory(0, splitAt));
+        var last = first.Append(bytes.AsMemory(splitAt));
+        var sequence = new System.Buffers.ReadOnlySequence<byte>(first, 0, last, last.Memory.Length);
+
+        var reader = new Utf8JsonReader(sequence);
+        reader.Read();
+        reader.HasValueSequence.ShouldBeTrue();
+
+        // Act
+        var result = new ObjectAsPrimitiveConverter().Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType(expectedType);
+        result.ToString().ShouldBe(number);
+    }
+
     #endregion
 
     #region FloatFormat settings
@@ -1299,6 +1326,26 @@ public class ObjectAsPrimitiveConverterUnitTests
                 new ObjectAsPrimitiveConverter(floatFormat, unknownNumberFormat, detectDateTimeOffset, objectFormat)
             }
         };
+    }
+
+    #endregion
+
+    #region helper types
+
+    /// <summary>
+    ///     A linked <see cref="System.Buffers.ReadOnlySequenceSegment{T}" /> used to build a multi-segment
+    ///     <see cref="System.Buffers.ReadOnlySequence{T}" /> so that <c>Utf8JsonReader.HasValueSequence</c> is exercised.
+    /// </summary>
+    private sealed class BufferSegment : System.Buffers.ReadOnlySequenceSegment<byte>
+    {
+        public BufferSegment(ReadOnlyMemory<byte> memory) => Memory = memory;
+
+        public BufferSegment Append(ReadOnlyMemory<byte> memory)
+        {
+            var segment = new BufferSegment(memory) { RunningIndex = RunningIndex + Memory.Length };
+            Next = segment;
+            return segment;
+        }
     }
 
     #endregion

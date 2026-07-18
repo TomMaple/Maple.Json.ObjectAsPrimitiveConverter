@@ -113,9 +113,12 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 
             case JsonTokenType.Number:
             {
-                var textValue = reader.HasValueSequence
-                    ? reader.ValueSequence.ToString()
-                    : Encoding.UTF8.GetString(reader.ValueSpan);
+                // Extract the raw UTF-8 bytes of the JSON number
+                var valueSpan = reader.HasValueSequence
+                    ? reader.ValueSequence.ToArray()
+                    : reader.ValueSpan;
+
+                var textValue = Encoding.UTF8.GetString(valueSpan);
 
                 if (textValue.Contains('.'))
                 {
