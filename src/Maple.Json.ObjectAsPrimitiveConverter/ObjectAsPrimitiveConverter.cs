@@ -127,7 +127,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 }
                 else
                 {
-                    if (TryGetInteger(ref reader, textValue, out var result))
+                    if (TryGetInteger(ref reader, out var result))
                         return result;
                 }
 
@@ -314,8 +314,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         return false;
     }
 
-    private static bool TryGetInteger(ref Utf8JsonReader reader, string? textValue,
-        [NotNullWhen(true)] out object? integerValue)
+    private static bool TryGetInteger(ref Utf8JsonReader reader, [NotNullWhen(true)] out object? integerValue)
     {
         if (reader.TryGetInt32(out var int32))
         {
@@ -328,6 +327,13 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
             integerValue = int64;
             return true;
         }
+
+        // Only values that overflow Int64 reach this point, so the string allocation is rare.
+        var valueSpan = reader.HasValueSequence
+            ? reader.ValueSequence.ToArray()
+            : reader.ValueSpan;
+
+        var textValue = Encoding.UTF8.GetString(valueSpan);
 
         if (BigInteger.TryParse(textValue, out var bigInt))
         {
