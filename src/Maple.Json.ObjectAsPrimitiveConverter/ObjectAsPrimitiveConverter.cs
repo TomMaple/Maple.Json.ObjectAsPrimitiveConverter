@@ -144,7 +144,9 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                     {
                     }
 
-                    if (reader.TokenType == JsonTokenType.EndArray)
+                    // A leftover Comment token means reader.Read() ran out of data while skipping
+                    // comments (truncated/streamed input); stop instead of mapping it to a null element.
+                    if (reader.TokenType is JsonTokenType.EndArray or JsonTokenType.Comment)
                         break;
 
                     var item = Read(ref reader, typeof(object), options);
@@ -163,7 +165,9 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                     {
                     }
 
-                    if (reader.TokenType == JsonTokenType.EndObject)
+                    // A leftover Comment token means reader.Read() ran out of data while skipping
+                    // comments (truncated/streamed input); stop instead of failing on the comment.
+                    if (reader.TokenType is JsonTokenType.EndObject or JsonTokenType.Comment)
                         break;
 
                     if (reader.TokenType == JsonTokenType.Null)

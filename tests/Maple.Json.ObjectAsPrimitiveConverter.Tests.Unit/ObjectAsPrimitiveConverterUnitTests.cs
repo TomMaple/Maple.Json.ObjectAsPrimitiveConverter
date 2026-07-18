@@ -374,6 +374,60 @@ public class ObjectAsPrimitiveConverterUnitTests
         array[2].ShouldBe(3);
     }
 
+    [Fact]
+    public void Read_ArrayTruncatedWhileSkippingTrailingComment_StopsWithoutSpuriousElement()
+    {
+        // Arrange
+
+        // With isFinalBlock: false, reader.Read() returns false (instead of throwing) when it runs out of
+        // data mid-stream. If that happens while the converter is skipping a comment, the leftover Comment
+        // token must not be mapped to a null array element.
+        const string json = "[1, /* trailing */";
+
+        var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+        var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(json), isFinalBlock: false, state);
+
+        reader.Read();
+
+        // Act
+        var result = new ObjectAsPrimitiveConverter().Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<object[]>();
+
+        var array = (object[])result;
+        array.Length.ShouldBe(1);
+        array[0].ShouldBe(1);
+    }
+
+    [Fact]
+    public void Read_ObjectTruncatedWhileSkippingTrailingComment_StopsWithoutError()
+    {
+        // Arrange
+
+        // With isFinalBlock: false, reader.Read() returns false (instead of throwing) when it runs out of
+        // data mid-stream. If that happens while the converter is skipping a comment, the leftover Comment
+        // token must not be treated as an unexpected token and throw.
+        const string json = """{"Property":1, /* trailing */""";
+
+        var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+        var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(json), isFinalBlock: false, state);
+
+        reader.Read();
+
+        // Act
+        var result = new ObjectAsPrimitiveConverter().Read(ref reader, typeof(object), new JsonSerializerOptions());
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldBeOfType<Dictionary<string, object>>();
+
+        var dictionary = (Dictionary<string, object>)result;
+        dictionary.ShouldContainKey("Property");
+        dictionary["Property"].ShouldBe(1);
+    }
+
     #endregion
 
     #region FloatFormat settings
