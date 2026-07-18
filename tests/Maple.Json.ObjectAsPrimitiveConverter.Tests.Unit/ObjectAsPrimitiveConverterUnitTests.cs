@@ -294,6 +294,7 @@ public class ObjectAsPrimitiveConverterUnitTests
     public void Read_NumberSplitAcrossBufferSegments_ParsesUsingDecodedText(string number, Type expectedType)
     {
         // Arrange
+
         // When a number token straddles two buffer segments, reader.HasValueSequence is true and the
         // converter must decode reader.ValueSequence (not call ToString() on it, which yields the type name).
         var bytes = System.Text.Encoding.UTF8.GetBytes(number);

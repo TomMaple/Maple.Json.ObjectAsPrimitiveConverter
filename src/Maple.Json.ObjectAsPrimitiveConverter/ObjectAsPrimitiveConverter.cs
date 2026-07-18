@@ -122,12 +122,12 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 
                 if (textValue.Contains('.'))
                 {
-                    if (TryGetFloat(reader, out var floatValue))
+                    if (TryGetFloat(ref reader, out var floatValue))
                         return floatValue;
                 }
                 else
                 {
-                    if (TryGetInteger(reader, textValue, out var result))
+                    if (TryGetInteger(ref reader, textValue, out var result))
                         return result;
                 }
 
@@ -285,7 +285,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         return false;
     }
 
-    private bool TryGetFloat(Utf8JsonReader reader, [NotNullWhen(true)] out object? floatValue)
+    private bool TryGetFloat(ref Utf8JsonReader reader, [NotNullWhen(true)] out object? floatValue)
     {
         if (FloatFormat is FloatFormat.Decimal
             && reader.TryGetDecimal(out var dec))
@@ -314,7 +314,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
         return false;
     }
 
-    private static bool TryGetInteger(Utf8JsonReader reader, string? textValue,
+    private static bool TryGetInteger(ref Utf8JsonReader reader, string? textValue,
         [NotNullWhen(true)] out object? integerValue)
     {
         if (reader.TryGetInt32(out var int32))
