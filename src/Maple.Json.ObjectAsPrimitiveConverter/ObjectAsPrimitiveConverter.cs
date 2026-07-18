@@ -17,6 +17,7 @@
 // ReSharper disable UnusedMember.Global
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
@@ -37,6 +38,12 @@ namespace Maple.Json.ObjectAsPrimitiveConverter;
 /// <remarks>Based on the implementation from: https://stackoverflow.com/a/65974452</remarks>
 public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
 {
+    #region consts
+
+    private static readonly SearchValues<char> DigitSearchValues = SearchValues.Create("0123456789");
+
+    #endregion
+
     #region constructors
 
     /// <summary>
@@ -110,7 +117,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                     ? reader.ValueSequence.ToString()
                     : Encoding.UTF8.GetString(reader.ValueSpan);
 
-                if (textValue.Contains("."))
+                if (textValue.Contains('.'))
                 {
                     if (TryGetFloat(reader, out var floatValue))
                         return floatValue;
@@ -126,7 +133,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                 if (UnknownNumberFormat is UnknownNumberFormat.JsonElement)
                     return doc.RootElement.Clone();
 
-                throw new JsonException($"Cannot parse number: ‘{doc.RootElement.ToString()}’");
+                throw new JsonException($"Cannot parse number: ‘{doc.RootElement}’");
             }
 
             case JsonTokenType.StartArray:
@@ -156,7 +163,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
                     {
                         using var doc = JsonDocument.ParseValue(ref reader);
 
-                        throw new JsonException($"Cannot parse object “{doc.RootElement.ToString()}”!");
+                        throw new JsonException($"Cannot parse object “{doc.RootElement}”!");
                     }
 
                     var key = reader.GetString() ?? string.Empty;
@@ -232,7 +239,7 @@ public partial class ObjectAsPrimitiveConverter : JsonConverter<object>
             return false;
 
         // Every detectable format contains at least one digit, so bail out before touching any regex or parser
-        if (!stringValue.AsSpan().ContainsAny("0123456789"))
+        if (!stringValue.AsSpan().ContainsAny(DigitSearchValues))
             return false;
 
         // Try to parse the string as a DateTimeOffset, DateTime, DateOnly, or TimeOnly based on the DetectDateTime flags
